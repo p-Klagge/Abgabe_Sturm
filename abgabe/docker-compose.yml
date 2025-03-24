@@ -1,0 +1,45 @@
+version: "3"
+services:
+  broker:
+    image: apache/kafka:latest
+    container_name: kafka
+    ports:
+      - "9092:9092"
+    networks:
+      kafka_net:
+        ipv4_address: "192.168.11.5"
+  
+  # Use root/example as user/password credentials
+  db:
+    image: mariadb:latest
+    container_name: db
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: example
+      MARIADB_DATABASE: kappa-view
+    ports:
+      - 3306:3306
+    volumes:
+      - ./initfile.sql:/docker-entrypoint-initdb.d/initfile.sql
+    networks:
+      kafka_net:
+        ipv4_address: "192.168.11.6"
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    networks:
+      kafka_net:
+        ipv4_address: "192.168.11.7"
+
+
+networks:
+  kafka_net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet:  192.168.11.0/24

@@ -172,3 +172,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+#local testing folder
+kafka-standalone/
+kappa-use-case/
