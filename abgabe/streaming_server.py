@@ -1,10 +1,12 @@
 import time
-
 from kafka import KafkaProducer
+from pathlib import Path
+
+path = Path().absolute().parent
+file_path = path / 'data/Online_Retail.csv'
 
 ## Kafka broker has to be running on localhost:9092
 
-file_path = "/home/student/test/anon_httpd_website4.it-2025-02-17.log"
 kafka_broker_address = 'localhost:9092'
 topic = 'abgabe-topic'
 
