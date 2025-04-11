@@ -4,18 +4,13 @@ from pyspark.sql.functions import col, concat, lit, split, regexp_replace, monot
 
 from pyspark.mllib.linalg import Vectors
 from pyspark.mllib.clustering import StreamingKMeans
-#from pyspark.sql.functions import window,endswith,when, coalesce
-# Set the necessary variables
-# The following links were used to determine the necessary packages to include:
-# - https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html and 
-# - https://github.com/OneCricketeer/docker-stacks/blob/master/hadoop-spark/spark-notebooks/kafka-sql.ipynb  
+
 
 scala_version = '2.12'  
 spark_version = '3.5.3'
 bootstrap_servers = ['localhost:9092']
 topic_name = 'abgabe-topic'
-#window_duration = '1 minute'
-#sliding_duration = '1 minute'
+
 
 packages = [
     f'org.apache.spark:spark-sql-kafka-0-10_{scala_version}:{spark_version}',
@@ -41,9 +36,7 @@ kafkaDf = spark.readStream.format("kafka")\
 print(kafkaDf.isStreaming)    # Returns True for DataFrames that have streaming sources
 kafkaDf.printSchema()
 
-#structure the column
-
-#InvoiceNo,StockCode,Description,Quantity,InvoiceDate,UnitPrice,CustomerID,Country
+#structure the columns for the incoming data
 structured_df = kafkaDf.select(
     concat(col("topic"), lit(':'), col("partition").cast("string")).alias("topic_partition"),
     col("offset"),
@@ -62,10 +55,8 @@ structured_df = kafkaDf.select(
     
 
 #filter and work with the data
-# Remove rows with null values in the Description column and select none Kafka system related columns
+# Remove rows with null values in the Description column and select relevant columns
 # kept offset as a primary key for the db, since the data is synthetic and can have dublicates
-# InvoiceNo,StockCode,Description,Quantity,InvoiceDate,UnitPrice,CustomerID,Country
-# Didnt drop dublicates, because of the way the streaming data is generated
 stream_data_df = structured_df = structured_df.filter(col("Description").isNotNull()).select(
     col("offset"),
     col("InvoiceNo"),
@@ -80,13 +71,11 @@ stream_data_df = structured_df = structured_df.filter(col("Description").isNotNu
 
 
 # Initialize the StreamingKMeans model
-# k=5 because i magicly now the input data :)
 # using a high decay factor of 0.9 because the way the stream is generated, 
 # does not simulate a real stream thats changing over time
 model = StreamingKMeans(k=5, decayFactor=0.9).setRandomCenters(2, 1.0, seed=1)
 
 # Perform clustering on the batch data
-
 def clusterWithStreamingKMeans(batchDataframe, batchId):
     print(f"Clustering batchId: {batchId} using StreamingKMeans")
     global model
@@ -111,7 +100,7 @@ def clusterWithStreamingKMeans(batchDataframe, batchId):
         batchDataframe_with_index = batchDataframe.withColumn("index", monotonically_increasing_id())
         prediction_df = batchDataframe_with_index.join(predictions_df, "index").drop("index")
 
-        # Show the clustered data
+        # Save the predictions and data to the database
         saveToDatabase(prediction_df, batchId, dbSchema1)
 
     else:
