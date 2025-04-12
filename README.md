@@ -6,11 +6,11 @@
 
 ## Business Case
 
-  Die Daten sind Verkaufsdaten eines Online-Händlers, der zum größten Teil im Vereinigten Königreich agiert.
+  Die Daten enthalten die Verkaufsdaten eines Online-Händlers, der zum größten Teil im Vereinigten Königreich agiert.
   Der Online-Händler möchte die Verkaufsdaten der Kunden aus dem Vereinigten Königreich untersuchen.
-  Mit Hilfe des Clusterings sollen mögliche Muster bzw. Gruppierungen in den Kunden gefunden werden.
-  Der Stream an Verkaufsdaten, wird nach Vereinigten Königreich und andere Länder aufgeteilt und auf die Daten aus dem Vereinigten Königreich wird clustering Algorithmus angewendet (StreamingKMeans).  
-  Die Daten aus dem Vereinigten Königreich werden mit der Vorhersage in eine Datenbanktabelle geschrieben. Die Daten aus anderen Ländern werden in eine separate Tabelle gespeichert.
+  Mit Hilfe des Clusterings sollen mögliche Muster bzw. Gruppierungen in den Kundendaten gefunden werden.
+  Der Stream an Verkaufsdaten, wird nach Vereinigtem Königreich und anderen Ländern aufgeteilt und auf die Daten aus dem Vereinigten Königreich wird ein Clustering-Algorithmus angewendet (StreamingKMeans).  
+  Die Daten aus dem Vereinigten Königreich werden mit der Vorhersage in eine Datenbanktabelle geschrieben. Die Daten aus den anderen Ländern werden in einer separaten Tabelle gespeichert.
 
 ## Componenten
 
@@ -20,15 +20,15 @@
 
 ### Data Ingestion Layer
 
-  Kafka, in einem Docker Container, übernimmt die Aufgabe der Data Ingestion Layer und nimmt den Datenstrom in eine Message Queue auf.
+  Kafka, in einem Docker Container, übernimmt die Aufgabe des Data Ingestion Layer und nimmt den Datenstrom in eine Message Queue auf.
 
 ### Stream Processing Layer
 
-  Ein Pythonscript (abgabe/stream_data_processor.py) verarbeitet die Daten aus der Message Queue, mit Hilfe von pyspark, und speichert diese in einer MariaDB
+  Ein Pythonscript (abgabe/stream_data_processor.py) verarbeitet, mit Hilfe von pyspark, die Daten aus der Message Queue und speichert diese in einer MariaDB.
 
 ### Serving Layer
 
-  Eine MariaDB innerhalb eines Docker Containers dienst als Serving Layer. Dort können die Daten abgerufen werden.
+  Eine MariaDB innerhalb eines Docker Containers dient als Serving Layer. Dort können die Daten abgerufen werden.
 
 ## Ausführung
 
@@ -59,10 +59,15 @@ Nun sollten alle Komponenten aktiv sein.
 
 ## Abrufen der Ergebnisse
 
-Auf http://localhost:8080/ sollte eine Zugang zu der DB erreichbar sein. Mit dem Username: root, Passwort: example, und Database: kappa-view  
-Auf der DB sind zwei Tabellen:
-- British_Online_Retail, diese enthält die Daten, die aus dem Vereinigten Königreich stammen und geclusterted wurden.
-- Other_Online_Retail, enthält die Daten aus anderen Ländern.
+Unter <http://localhost:8080/> ist die MariaDB erreichbar. Login mittels:
+
+Username: root 
+Passwort: example
+Database: kappa-view  
+
+In der DB befinden sich zwei Tabellen:
+- **British_Online_Retail:** diese enthält die Daten, die aus dem Vereinigten Königreich stammen und geclusterted wurden.
+- **Other_Online_Retail:** enthält die Daten aus den anderen Ländern.
 
 ## Stoppen der Anwendung
 
